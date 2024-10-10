@@ -72,19 +72,10 @@ class City:
     def add_vertex(self, x: int, y: int, z: int = 0):
         self.json["vertices"].append([x, y, z])
 
-        return self
+        return len(self.json["vertices"]) - 1
 
-    def add_vertices(self, x: list[int], y: list[int], z: list[int] = None):
-        if z is None:
-            for _x, _y in zip(x, y):
-                self.add_vertex(_x, _y)
-        else:
-            for _x, _y, _z in zip(x, y, z):
-                self.add_vertex(_x, _y, _z)
-
-        return self
-
-    def add_cube(self, location_id):
+    def add_cube(self, x: int, y: int, z: int = 0):
+        location_id = self.add_vertex(x, y, z)
         template_id = self.cube_template
         cityobject_id = self.new_cityobject_id()
 
@@ -118,10 +109,12 @@ class City:
         }
 
         self.json["CityObjects"][cityobject_id] = object
-        return self
+        return cityobject_id
 
 
 if __name__ == "__main__":
-    City().add_vertices([0, 0], [2, 0], [0, 0]).add_cube(0).add_cube(1).to_cityjson(
-        "test.city.json"
-    )
+    city = City()
+    for x, y in zip([0, 0], [2, 0]):
+        city.add_cube(x, y)
+
+    city.to_cityjson("test.city.json")
