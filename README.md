@@ -9,5 +9,6 @@ This is a small side quest to try and convert local climate zone (LCZ) maps to C
 
 So far I'm able to reproduce (to some extent) the prototypes from [paper](https://www.sciencedirect.com/science/article/abs/pii/S0034425723001244):
 
-![Reference](LCZ_prototypes_original.jpg)
-![Reproduced version](LCZ_prototypes_reproduced_in_cityjson.png)
+Reference             |  Reproduced in CityJSON
+:-------------------------:|:-------------------------:
+![Reference](LCZ_prototypes_original.jpg) | ![Reproduced version](LCZ_prototypes_reproduced_in_cityjson.png)
