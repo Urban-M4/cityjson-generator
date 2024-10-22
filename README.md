@@ -1,6 +1,6 @@
 # Generate CityJSON
 
-This is a small side quest to try and convert local climate zone (LCZ) maps to CityJSON in order to render them in 3D.
+This is a small side quest to try and convert local climate zone (LCZ) raster maps to CityJSON in order to render them in 3D.
 
 - Run the script with `python3 generator.py`.
 - Validate by uploading `test.city.json` to https://validator.cityjson.org/
