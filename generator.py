@@ -23,10 +23,11 @@ class City:
             "metadata": {},
             "CityObjects": {},
             "vertices": [],
-            "appearance": {},
+            "appearance": {"materials": [], "textures": []},
             "geometry-templates": {"templates": [], "vertices-templates": []},
         }
         self.templates: dict[str, int] = {}
+        self.materials: dict[str, int] = {}
         self._cityobject_counter = itertools.count()
 
     def new_cityobject_id(self):
@@ -108,6 +109,65 @@ class City:
 
     def add_cube(self, x: int, y: int, z: int = 0, scaling=(1, 1, 1)) -> str:
         return self.add_template(self.cube_template, x, y, z, scaling=scaling)
+
+    def add_material(self, name: str, color=[0.5, 0.5, 0.5]) -> str:
+        """Add a material with `name` and `color` to appearences dict.
+
+        color should be a list of rgb values between 0 and 1.
+        """
+        # If we've called it before, we don't have to add it again
+        if (material_id := self.materials.get(name)) is not None:
+            return material_id
+
+        # If this is the first call, store the id for later reference
+        n = len(self.json["appearance"]["materials"])
+        self.materials[name] = n
+
+        self.json["appearance"]["materials"].append(
+            {
+                "name": name,
+                # "ambientIntensity": 0.4000,
+                "diffuseColor": color,
+                "emissiveColor": color,
+                "specularColor": color,
+                # "shininess": 0.0,
+                # "transparency": 0,
+                # "isSmooth": True,
+            }
+        )
+
+        return n
+
+    def add_landuse(self, x: int, y: int, z: int = 0, lu_type: str = "grass") -> str:
+        a = self.add_vertex(x - 50, y - 50)
+        b = self.add_vertex(x + 50, y - 50)
+        c = self.add_vertex(x + 50, y + 50)
+        d = self.add_vertex(x - 50, y + 50)
+        cityobject_id = self.new_cityobject_id()
+
+        materials = {
+            "grass": [0, 106 / 256, 78 / 256],
+            "water": [0, 0, 1],
+            "building": [0.5, 0.5, 0.5],
+            "asphalt": [0, 0, 0],
+            # ...
+        }
+
+        material_id = self.add_material(lu_type, materials[lu_type])
+
+        object = {
+            "type": "LandUse",
+            "geometry": [
+                {
+                    "type": "MultiSurface",
+                    "lod": "2",
+                    "boundaries": [[[a, b, c, d]]],
+                    "material": {f"landuse_{material_id}": {"values": [material_id]}},
+                }
+            ],
+        }
+        self.json["CityObjects"][cityobject_id] = object
+        return cityobject_id
 
     def add_lcz1(self, x: int, y: int, z: int = 0) -> None:
         """Add compact high rise on 100m grid cells."""
@@ -234,11 +294,12 @@ class City:
         self.add_cube(x, y, scaling=(23.8, 23.8, 10))
 
 
-if __name__ == "__main__":
-    city = City()
-    # for x, y in zip([0, 0], [2, 0]):
-    #     city.add_cube(x, y)
+def reproduce_prototypes():
+    """Reproduce image with prototypes of LCZs."""
+    filename = "prototypes.city.json"
+    print("Reproducing prototypes LCZ image...")
 
+    city = City()
     city.add_lcz1(50, 50)
     city.add_lcz2(50, 150)
     city.add_lcz3(50, 250)
@@ -249,5 +310,30 @@ if __name__ == "__main__":
     city.add_lcz8(50, 350)
     city.add_lcz9(150, 350)
     city.add_lcz10(50, 450)
-    city.to_cityjson("test.city.json")
-    print("Done")
+    city.to_cityjson(filename)
+
+    print(f"Result stored in {filename}")
+
+
+def map_landuse():
+    filename = "landusemap.city.json"
+    print("Mapping landuse types")
+
+    city = City()
+    city.add_landuse(50, 50, lu_type="grass")
+    city.add_landuse(150, 50, lu_type="grass")
+    city.add_landuse(250, 50, lu_type="asphalt")
+    city.add_landuse(50, 150, lu_type="water")
+    city.add_landuse(150, 150, lu_type="water")
+    city.add_landuse(250, 150, lu_type="asphalt")
+    city.add_landuse(50, 250, lu_type="building")
+    city.add_landuse(150, 250, lu_type="building")
+    city.add_landuse(250, 250, lu_type="asphalt")
+    city.to_cityjson(filename)
+
+    print(f"Results stored in {filename}")
+
+
+if __name__ == "__main__":
+    reproduce_prototypes()
+    map_landuse()
