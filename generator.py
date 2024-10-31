@@ -293,6 +293,20 @@ class City:
         self.add_cube(x - 50, y - 50, scaling=(23.8, 23.8, 10))
         self.add_cube(x, y, scaling=(23.8, 23.8, 10))
 
+    def add_lcz(self, x: int, y: int, lcz: int):
+        match lcz:
+            case 51: return self.add_lcz1(x, y)
+            case 52: return self.add_lcz2(x, y)
+            case 53: return self.add_lcz3(x, y)
+            case 54: return self.add_lcz4(x, y)
+            case 55: return self.add_lcz5(x, y)
+            case 56: return self.add_lcz6(x, y)
+            case 57: return self.add_lcz7(x, y)
+            case 58: return self.add_lcz8(x, y)
+            case 59: return self.add_lcz9(x, y)
+            case 61: return self.add_lcz10(x, y)
+            case _: return
+
 
 def reproduce_prototypes():
     """Reproduce image with prototypes of LCZs."""
@@ -334,6 +348,43 @@ def map_landuse():
     print(f"Results stored in {filename}")
 
 
+def generate_map():
+    filename = "lcz_map.city.json"
+    print("Mapping lcz raster to CityJSON")
+
+    import numpy as np
+    nx = ny = 50   # 50 switches on performance mode on ninja viewer
+    xs = np.arange(nx) * 100 + 50
+    ys = np.arange(ny) * 100 + 50
+    lcz = np.random.randint(0, 10, size=(nx, ny))
+
+    city = City()
+    for (i, x) in enumerate(xs):
+        for (j, y) in enumerate(ys):
+            city.add_lcz(int(x), int(y), int(lcz[i, j]))
+
+    city.to_cityjson(filename)
+    print(f"Results stored in {filename}")
+
+def map_amsterdam():
+    filename = "lcz_amsterdam.city.json"
+    print("Mapping lcz raster to CityJSON")
+
+    import xarray as xr
+    da = xr.open_dataarray('CGLC_MODIS_LCZ_cutout_NL.zarr')
+    amsterdam = da.sel(X=slice(4.85, 4.92), Y=slice(52.4, 52.35))
+
+    city = City()
+    for (i, x) in enumerate(amsterdam.X):
+        for (j, y) in enumerate(amsterdam.Y):
+            city.add_lcz(i*100, j*-100, amsterdam[j, i].item())
+
+    # city.json['metadata']['referenceSystem'] = "http://www.opengis.net/def/crs/EPSG/0/4326"
+    city.to_cityjson(filename)
+    print(f"Results stored in {filename}")
+
 if __name__ == "__main__":
     reproduce_prototypes()
     map_landuse()
+    generate_map()
+    map_amsterdam()
