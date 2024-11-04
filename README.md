@@ -12,3 +12,5 @@ So far I'm able to reproduce (to some extent) the prototypes from [paper](https:
 Reference             |  Reproduced in CityJSON
 :-------------------------:|:-------------------------:
 ![Reference](LCZ_prototypes_original.jpg) | ![Reproduced version](LCZ_prototypes_reproduced_in_cityjson.png)
+![google earth](https://github.com/user-attachments/assets/eadcf5af-a186-457c-bfbe-d16f14e716e2) | ![cityjson lcz](https://github.com/user-attachments/assets/33984464-1aaf-4808-a7ea-b7e290bef8f3)
+
