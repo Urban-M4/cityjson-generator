@@ -138,7 +138,7 @@ class City:
 
         return n
 
-    def add_landuse(self, x: int, y: int, z: int = 0, lu_type: str = "grass") -> str:
+    def add_landuse(self, x: int, y: int, z: int = 0, lu_type: str = "grass", object_type="LandUse") -> str:
         a = self.add_vertex(x - 50, y - 50)
         b = self.add_vertex(x + 50, y - 50)
         c = self.add_vertex(x + 50, y + 50)
@@ -156,7 +156,7 @@ class City:
         material_id = self.add_material(lu_type, materials[lu_type])
 
         object = {
-            "type": "LandUse",
+            "type": object_type,
             "geometry": [
                 {
                     "type": "MultiSurface",
@@ -305,7 +305,9 @@ class City:
             case 58: return self.add_lcz8(x, y)
             case 59: return self.add_lcz9(x, y)
             case 61: return self.add_lcz10(x, y)
-            case _: return
+            case 17: return self.add_landuse(x, y, object_type="WaterBody")
+            case 21: return self.add_landuse(x, y, object_type="WaterBody")
+            case _: return self.add_landuse(x, y, object_type="LandUse")
 
 
 def reproduce_prototypes():
@@ -383,8 +385,27 @@ def map_amsterdam():
     city.to_cityjson(filename)
     print(f"Results stored in {filename}")
 
+def map_manhattan():
+
+    filename = "lcz_manhattan.city.json"
+    print("Mapping lcz raster to CityJSON")
+
+    import xarray as xr
+    da = xr.open_dataarray('CGLC_MODIS_LCZ_cutout_Manhattan.zarr')
+    manhattan = da.sel(X=slice(-74.05, -73.95) , Y=slice(40.80, 40.68))
+
+    city = City()
+    for (i, x) in enumerate(manhattan.X):
+        for (j, y) in enumerate(manhattan.Y):
+            city.add_lcz(i*100, j*-100, manhattan[j, i].item())
+
+    # city.json['metadata']['referenceSystem'] = "http://www.opengis.net/def/crs/EPSG/0/4326"
+    city.to_cityjson(filename)
+    print(f"Results stored in {filename}")
+
 if __name__ == "__main__":
     reproduce_prototypes()
     map_landuse()
     generate_map()
     map_amsterdam()
+    map_manhattan()
